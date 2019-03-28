@@ -8,20 +8,30 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
 
 </head>
-Name : <input type="text" placeholder="Enter name" id="name"/><br/>
-Message:
-<textarea id="textarea"></textarea>
-<button onclick="sendChat()" id="send">Send</button>
-<body>
 
+<body>
+    Name : <input type="text" placeholder="Enter name" id="name" /><br />
+    Message:
+    <textarea id="textarea"></textarea>
+    <button onclick="sendChat()" id="send">Send</button>
+    <ul id="chats">
+        
+    </ul>
 </body>
 <script type="text/javascript">
     var stomp = null;
     var username = "default";
     var socket = new SockJS('http://127.0.0.1:8080/chatWS');
     stompClient = Stomp.over(socket);
-    stompClient.connect({}, onConnected, onError);
 
+    var header = {
+        "name" : "asd",
+        "suuid":"bb2c9039-0ed3-4d6f-b078-db965286944d",
+        "ruuid":"bb2c9039-0ed3-4d6f-b078-db965286944d"
+    }
+
+    stompClient.connect(header, onConnected, onError);
+    //stompClient.debug = null
     function onConnected() {
         //console.log("connected");
         stompClient.subscribe('/topic/public', onMessageReceived);
@@ -36,11 +46,11 @@ Message:
         username = $("#name").val();
         stompClient.send("/app/chat",
             {},
-            JSON.stringify({ sender: username, type: 'JOIN',content:message.trim() })
+            JSON.stringify({ sender: username, type: 'JOIN', content: message.trim() })
         )
     }
 
-    function onMessageReceived(payload){
+    function onMessageReceived(payload) {
         console.log("#####################");
         var message = JSON.parse(payload.body);
         console.log(message.content);
