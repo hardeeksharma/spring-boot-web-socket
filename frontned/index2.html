@@ -24,11 +24,7 @@
     stompClient = Stomp.over(socket);
 
     var username = "default";
-    var connect_headers = {
-        "uuid" : "bb2c9039-0ed3-4d6f-b0788",
-        "fullName" : "Hardeek Sharma",
-        "jwt" : "my-jwt-token"
-    }
+
     var header = {
         "sender-name": "",
         "suuid": "bb2c9039-0ed3-4d6f-b078-db965286944d",
@@ -36,16 +32,16 @@
         "jwt-token": "my-jwt-token"
     }
 
-    stompClient.connect(connect_headers, onConnected, onError);
+    stompClient.connect(header, onConnected, onError);
     //stompClient.debug = null
     function onConnected() {
         //console.log("connected");
         stompClient.subscribe('/topic/public ', onMessageReceived);
-        stompClient.subscribe('/topic/public.bb2c9039-0ed3-4d6f-b078-db965286944d', receive);
+        stompClient.subscribe('/topic/public.bb2c9039',receive);
     }
 
-    function receive(payload) {
-        console.log(JSON.parse(payload.body));
+    function receive(payload){
+            console.log( JSON.parse(payload.body));
     }
 
     function onError() {
@@ -63,11 +59,11 @@
 
     function sendChatRequest() {
         let chatRequest = {
-            requestFromUuid: "bb2c9039-0ed3-4d6f-b078-db965286944d",
-            requestToUuid: "bb2c9039",
+            requestFromUuid: "bb2c9039",
+            requestToUuid: "bb2c9039-0ed3-4d6f-b078-db965286944d",
             requestPurpose: " this is my request purpose"
         }
-        stompClient.send("/app/chat/request.send.bb2c9039-0ed3-4d6f-b078-db965286944d", {}, JSON.stringify(chatRequest));
+        stompClient.send("/app/chat/request.send.bb2c9039",{},JSON.stringify(chatRequest));
     }
 
     function onMessageReceived(payload) {

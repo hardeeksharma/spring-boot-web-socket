@@ -27,34 +27,34 @@ import com.rmehub.chat.interceptor.RmeWebSocketHandShakeInterceptor;
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
-	@Override
-	public void registerStompEndpoints(StompEndpointRegistry registry) {
-		registry.addEndpoint("/chatWS")// ws connection url
-				.setAllowedOrigins("*")
-				.addInterceptors(handShakeInterceptor())
-				.withSockJS();
-	}
+    @Override
+    public void registerStompEndpoints(StompEndpointRegistry registry) {
+        registry.addEndpoint("/chatWS")// ws connection url
+                .setAllowedOrigins("*")
+                .addInterceptors(handShakeInterceptor())
+                .withSockJS();
+    }
 
-	@Override
-	public void configureMessageBroker(MessageBrokerRegistry registry) {
-		registry.setApplicationDestinationPrefixes("/app")// to send data to ws
-				.enableSimpleBroker("/topic"); // to subscribe for real time feed
-	}
+    @Override
+    public void configureMessageBroker(MessageBrokerRegistry registry) {
+        registry.setApplicationDestinationPrefixes("/app")// to send data to ws
+                .enableSimpleBroker("/topic"); // to subscribe for real time feed
+    }
 
-	@Override
-	public void configureClientInboundChannel(ChannelRegistration registration) {
-		registration.setInterceptors(rmeSessionChannelInterceptor());
-	}
+    @Override
+    public void configureClientInboundChannel(ChannelRegistration registration) {
+        registration.setInterceptors(rmeSessionChannelInterceptor());
+    }
 
-	@Bean
-	public RmeSessionChannelInterceptor rmeSessionChannelInterceptor() {
-		return new RmeSessionChannelInterceptor();
-	}
-	
-	@Bean
-	public RmeWebSocketHandShakeInterceptor handShakeInterceptor() {
-		return new RmeWebSocketHandShakeInterceptor();
-	}
+    @Bean
+    public RmeSessionChannelInterceptor rmeSessionChannelInterceptor() {
+        return new RmeSessionChannelInterceptor();
+    }
 
-	
+    @Bean
+    public RmeWebSocketHandShakeInterceptor handShakeInterceptor() {
+        return new RmeWebSocketHandShakeInterceptor();
+    }
+
+
 }
