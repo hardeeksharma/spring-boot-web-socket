@@ -1,5 +1,6 @@
 package com.rmehub.chat.controller;
 
+import java.security.Principal;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -12,6 +13,9 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 
 import com.rmehub.chat.model.ChatMessage;
@@ -32,9 +36,9 @@ public class ChatController {
     }
 
     @MessageMapping("/chat/request.send.{fromUuid}")
-    public void sendChatRequest(@Payload ChatRequest chatRequest, @DestinationVariable String fromUuid) {
-
-        System.out.println(chatRequest);
+    public void sendChatRequest(@Payload ChatRequest chatRequest, @DestinationVariable String fromUuid, StompHeaderAccessor accessor) {
+//        Authentication principal = (Authentication) accessor.getUser();
+//        System.out.println(principal.getName());
         chatRequest.setRequestFromUuid(fromUuid);
         simpMessagingTemplate.convertAndSend("/topic/public." + chatRequest.getRequestToUuid(), chatRequest);
     }

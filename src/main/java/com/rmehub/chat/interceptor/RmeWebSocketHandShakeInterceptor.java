@@ -16,15 +16,15 @@ public class RmeWebSocketHandShakeInterceptor implements HandshakeInterceptor {
 	public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler,
 			Map<String, Object> attributes) throws Exception {
 
-		System.out.println(request.getHeaders());
+		System.out.println("HandshakeInterceptor");
 
-		if (request instanceof ServletServerHttpRequest) {
-			ServletServerHttpRequest servletRequest = (ServletServerHttpRequest) request;
-			HttpSession session = servletRequest.getServletRequest().getSession();
-			//if (session == null) {
-				attributes.put("session.id", session.getId());
-			//}
-		}
+//		if (request instanceof ServletServerHttpRequest) {
+//			ServletServerHttpRequest servletRequest = (ServletServerHttpRequest) request;
+//			HttpSession session = servletRequest.getServletRequest().getSession();
+//			//if (session == null) {
+//				attributes.put("session.id", session.getId());
+//			//}
+//		}
 		return true;
 	}
 
