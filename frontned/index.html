@@ -23,18 +23,22 @@
     var socket = new SockJS('http://127.0.0.1:8080/chatWS');
     stompClient = Stomp.over(socket);
 
-    var username = "default";
-    var connect_headers = {
-        "uuid" : "bb2c9039-0ed3-4d6f-b0788",
+    var userData ={
+        "uuid" : "bb2c9039-0ed3-4d6f",
         "fullName" : "Hardeek Sharma",
         "jwt" : "my-jwt-token"
     }
-    var header = {
-        "sender-name": "",
-        "suuid": "bb2c9039-0ed3-4d6f-b078-db965286944d",
-        "ruuid": "bb2c9039-0ed3-4d6f-b078-db965286944d",
-        "jwt-token": "my-jwt-token"
+    var connect_headers = {
+        "uuid" : userData.uuid,
+        "fullName" : userData.fullName,
+        "jwt" : userData.jwt
     }
+    // var header = {
+    //     "sender-name": "",
+    //     "suuid": "bb2c9039-0ed3-4d6f-b078-db965286944d",
+    //     "ruuid": "bb2c9039-0ed3-4d6f-b078-db965286944d",
+    //     "jwt-token": "my-jwt-token"
+    // }
 
     stompClient.connect(connect_headers, onConnected, onError);
     //stompClient.debug = null
@@ -42,6 +46,11 @@
         //console.log("connected");
         stompClient.subscribe('/topic/public ', onMessageReceived);
         stompClient.subscribe('/topic/public.bb2c9039-0ed3-4d6f-b078-db965286944d', receive);
+        stompClient.subscribe(`/topic/request/ack.${userData.uuid}`,notifyMe);
+    }
+
+    function notifyMe(payload) {
+        console.log(payload);
     }
 
     function receive(payload) {
@@ -62,12 +71,12 @@
     }
 
     function sendChatRequest() {
-        let chatRequest = {
-            requestFromUuid: "bb2c9039-0ed3-4d6f-b078-db965286944d",
+        var chatRequest = {
+            requestFromUuid: userData.uuid,
             requestToUuid: "bb2c9039",
             requestPurpose: " this is my request purpose"
         }
-        stompClient.send("/app/chat/request.send.bb2c9039-0ed3-4d6f-b078-db965286944d", connect_headers,JSON.stringify(chatRequest));
+        stompClient.send(`/app/chat/request.send.${chatRequest.requestToUuid}`, connect_headers,JSON.stringify(chatRequest));
     }
 
     function onMessageReceived(payload) {

@@ -35,6 +35,7 @@ public class RmeSessionChannelInterceptor implements ChannelInterceptor {
         final ChatUser chatUser;
         switch (accessor.getCommand()) {
             case CONNECT:
+
                 System.out.println("i am in connect");
 
                 List<String> uuidList = accessor.getNativeHeader("uuid");
@@ -55,18 +56,17 @@ public class RmeSessionChannelInterceptor implements ChannelInterceptor {
                             uuid(uuid)
                             .fullName(fullName)
                             .build();
-
                     chatUserRepository.save(chatUser);
                     System.out.println("User Saved");
                 } else {
                     chatUser = optionalChatUser.get();
                 }
 
+                System.out.println(chatUser);
                 Authentication user = webSocketAuthenticatorService.getAuthenticatedOrFail(chatUser, jwt);
                 //setting principal user in header accessor
                 accessor.setUser(user);
                 break;
-
             case CONNECTED:
 
                 break;
@@ -95,5 +95,4 @@ public class RmeSessionChannelInterceptor implements ChannelInterceptor {
         }
 
     }
-
 }

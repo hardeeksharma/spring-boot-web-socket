@@ -39,7 +39,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         registry.setApplicationDestinationPrefixes("/app")// to send data to ws
-                .enableSimpleBroker("/topic"); // to subscribe for real time feed
+        .enableSimpleBroker("/queue/", "/topic/", "/exchange/");
+        // to subscribe for real time feed
     }
 
     @Override
