@@ -3,45 +3,64 @@
 <head>
     <title>Chat Demo in spring</title>
     <script src="http://code.jquery.com/jquery-3.3.1.min.js"
-        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+            integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.3.0/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
 
 </head>
 
 <body>
-    Name : <input type="text" placeholder="Enter name" id="name" /><br />
-    Message:
-    <textarea id="textarea"></textarea>
-    <button onclick="sendChat()" id="send">Send</button>
-    <ul id="chats">
+Name : <input type="text" placeholder="Enter name" id="name" /><br />
+Message:
+<textarea id="textarea"></textarea>
+<button onclick="sendChat()" id="send">Send</button>
+<ul id="chats">
 
-    </ul>
+</ul>
 </body>
 <script type="text/javascript">
     var stomp = null;
     var socket = new SockJS('http://127.0.0.1:8080/chatWS');
     stompClient = Stomp.over(socket);
 
-    var username = "default";
-
-    var header = {
-        "sender-name": "",
-        "suuid": "bb2c9039-0ed3-4d6f-b078-db965286944d",
-        "ruuid": "bb2c9039-0ed3-4d6f-b078-db965286944d",
-        "jwt-token": "my-jwt-token"
+    var userData ={
+        "uuid" : "bb2c9039-0ed3-4d6f-b078-db965286944d",
+        "fullName" : "Shaan Bhattacharya",
+        "jwt" : "shaan-jwt-token"
     }
+    var connect_headers = {
+        "uuid" : userData.uuid,
+        "fullName" : userData.fullName,
+        "jwt" : userData.jwt
+    }
+    // var header = {
+    //     "sender-name": "",
+    //     "suuid": "bb2c9039-0ed3-4d6f-b078-db965286944d",
+    //     "ruuid": "bb2c9039-0ed3-4d6f-b078-db965286944d",
+    //     "jwt-token": "my-jwt-token"
+    // }
 
-    stompClient.connect(header, onConnected, onError);
+    stompClient.connect(connect_headers, onConnected, onError);
     //stompClient.debug = null
     function onConnected() {
         //console.log("connected");
         stompClient.subscribe('/topic/public ', onMessageReceived);
-        stompClient.subscribe('/topic/public.bb2c9039',receive);
+        stompClient.subscribe('/topic/public.bb2c9039-0ed3-4d6f-b078-db965286944d', receive);
+        stompClient.subscribe(`/topic/request/ack.${userData.uuid}`,notifyMe);
     }
 
-    function receive(payload){
-            console.log( JSON.parse(payload.body));
+    function notifyMe(payload) {
+        let response = JSON.parse(payload.body);
+
+        switch (response.responseCode) {
+
+            case 'CHAT_REQUEST_SENT': console.log("OK OK OK")
+
+        }
+    }
+
+    function receive(payload) {
+        console.log(JSON.parse(payload.body));
     }
 
     function onError() {
@@ -58,12 +77,23 @@
     }
 
     function sendChatRequest() {
-        let chatRequest = {
-            requestFromUuid: "bb2c9039",
-            requestToUuid: "bb2c9039-0ed3-4d6f-b078-db965286944d",
+        var chatRequest = {
+            requestFromUuid: userData.uuid,
+            senderName : "Hardeek Sharma",
+            requestToUuid: "bb2c9039-0ed3-4d6f",
+            receiverName : "Sanu Bhattacharya",
             requestPurpose: " this is my request purpose"
         }
-        stompClient.send("/app/chat/request.send.bb2c9039",{},JSON.stringify(chatRequest));
+        stompClient.send(`/app/chat/request.send.${chatRequest.requestToUuid}`, connect_headers,JSON.stringify(chatRequest));
+    }
+
+    function acceptOrRejectChatRequest(chatRequestId,isAccepted) {
+
+        var data = {
+            accept : isAccepted
+        }
+        console.log(data)
+        stompClient.send(`/app/chat/request.acceptOrReject.${chatRequestId}`, connect_headers,JSON.stringify(data));
     }
 
     function onMessageReceived(payload) {

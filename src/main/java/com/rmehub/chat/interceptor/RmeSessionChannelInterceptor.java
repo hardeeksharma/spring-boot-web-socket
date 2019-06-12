@@ -8,6 +8,7 @@ import java.util.Optional;
 import com.rmehub.chat.model.ChatUser;
 import com.rmehub.chat.repository.ChatUserRepository;
 import com.rmehub.chat.service.WebSocketAuthenticatorService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -20,7 +21,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.MultiValueMap;
 
-
+@Slf4j
 public class RmeSessionChannelInterceptor implements ChannelInterceptor {
 
     @Autowired
@@ -33,11 +34,9 @@ public class RmeSessionChannelInterceptor implements ChannelInterceptor {
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
         final ChatUser chatUser;
+
         switch (accessor.getCommand()) {
             case CONNECT:
-
-                System.out.println("i am in connect");
-
                 List<String> uuidList = accessor.getNativeHeader("uuid");
                 List<String> fullNameList = accessor.getNativeHeader("fullName");
                 List<String> jwtList = accessor.getNativeHeader("jwt");
@@ -48,19 +47,20 @@ public class RmeSessionChannelInterceptor implements ChannelInterceptor {
                 String uuid = uuidList.get(0);
                 String fullName = fullNameList.get(0);
                 String jwt = jwtList.get(0);
-
+                System.out.println("i am in connect");
                 // checking if we have saved the user in DB of chat or not
                 Optional<ChatUser> optionalChatUser = chatUserRepository.findByUuid(uuid);
                 if (!optionalChatUser.isPresent()) {
                     chatUser = ChatUser.builder().
-                            uuid(uuid)
+                            uuid(uuid).isOnline(true)
                             .fullName(fullName)
                             .build();
-                    chatUserRepository.save(chatUser);
-                    System.out.println("User Saved");
+                    System.out.println("New User Saved");
                 } else {
                     chatUser = optionalChatUser.get();
+                    chatUser.setOnline(true);
                 }
+                chatUserRepository.save(chatUser);
 
                 System.out.println(chatUser);
                 Authentication user = webSocketAuthenticatorService.getAuthenticatedOrFail(chatUser, jwt);
@@ -71,7 +71,8 @@ public class RmeSessionChannelInterceptor implements ChannelInterceptor {
 
                 break;
             case DISCONNECT:
-                // toggleUserPresence(stompDetails.getUser().getName().toString(), false);
+                //   toggleUserPresence(uuid, false);
+                log.info("User Disconnected");
                 break;
             default:
                 break;
@@ -94,5 +95,19 @@ public class RmeSessionChannelInterceptor implements ChannelInterceptor {
             return;
         }
 
+    }
+
+    private void toggleUserPresence(String uuid, boolean isConnected) {
+
+        Optional<ChatUser> optionalChatUser = chatUserRepository.findByUuid(uuid);
+        ChatUser user = optionalChatUser.get();
+
+        if (!isConnected) {
+            user.setOnline(false);
+        } else {
+            user.setOnline(true);
+        }
+        user = chatUserRepository.save(user);
+        log.info(user.toString());
     }
 }

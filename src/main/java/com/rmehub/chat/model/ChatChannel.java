@@ -22,9 +22,12 @@ public class ChatChannel {
     private ChatRequest request;
 
     @Indexed
-    private String channelId;
+    private String channelId; // Create Random Chat channel ID
 
+    @DBRef
     private ChatUser user1;
+
+    @DBRef
     private ChatUser user2;
 
     private Date lastChatTimeStamp;

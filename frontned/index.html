@@ -50,7 +50,13 @@
     }
 
     function notifyMe(payload) {
-        console.log(payload);
+        let response = JSON.parse(payload.body);
+
+        switch (response.responseCode) {
+
+            case 'CHAT_REQUEST_SENT': console.log("OK OK OK")
+
+        }
     }
 
     function receive(payload) {
@@ -73,10 +79,21 @@
     function sendChatRequest() {
         var chatRequest = {
             requestFromUuid: userData.uuid,
-            requestToUuid: "bb2c9039",
+            senderName : "Hardeek Sharma",
+            requestToUuid: "bb2c9039-0ed3-4d6f",
+            receiverName : "Sanu Bhattacharya",
             requestPurpose: " this is my request purpose"
         }
         stompClient.send(`/app/chat/request.send.${chatRequest.requestToUuid}`, connect_headers,JSON.stringify(chatRequest));
+    }
+
+    function acceptOrRejectChatRequest(chatRequestId,isAccepted) {
+
+        var data = {
+            accept : isAccepted
+        }
+        console.log(data)
+        stompClient.send(`/app/chat/request.acceptOrReject.${chatRequestId}`, connect_headers,JSON.stringify(data));
     }
 
     function onMessageReceived(payload) {

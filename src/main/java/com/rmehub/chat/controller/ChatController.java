@@ -3,6 +3,9 @@ package com.rmehub.chat.controller;
 import java.security.Principal;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import com.rmehub.chat.constant.ResponseCode;
 import com.rmehub.chat.dto.request.NewChat;
@@ -44,12 +47,13 @@ public class ChatController {
     }
 
     @MessageMapping("/chat/request.send.{toUuid}")
-    public void sendChatRequest(@Payload ChatRequest chatRequest, @DestinationVariable String toUuid, StompHeaderAccessor accessor) {
+    @SendTo("/chat/request.receive.{toUuid}")
+    public GenericResponse sendChatRequest(@Payload ChatRequest chatRequest, @DestinationVariable String toUuid, StompHeaderAccessor accessor) {
 
         GenericResponse genericResponse;
 
         log.info(chatRequest.toString());
-        chatRequestService.save(chatRequest);
+        ChatRequest chatRequestResponse = chatRequestService.save(chatRequest);
         log.info("Chat request saved");
         genericResponse = GenericResponse.builder()
                 .isError(false)
@@ -57,11 +61,25 @@ public class ChatController {
                 .responseCode(ResponseCode.CHAT_REQUEST_SENT)
                 .build();
         simpMessagingTemplate.convertAndSend("/topic/request/ack." + chatRequest.getRequestFromUuid(), genericResponse);
+
+        genericResponse = GenericResponse.builder().isError(false).statusCode(201)
+                .responseCode(ResponseCode.NEW_CHAT_REQUEST).build();
+
+        return genericResponse;
     }
 
-    @MessageMapping("/chat/request.accept")
-    private void acceptChatRequest(@Payload ChatRequest chatRequest) {
-        log.info(chatRequest.toString());
+    @MessageMapping("/chat/request.acceptOrReject.{requestId}")
+    private void acceptOrRejectChatRequest(@DestinationVariable String requestId, @Payload ChatRequest chatRequest, StompHeaderAccessor accessor) {
+
+        log.info(requestId);
+        boolean isAccepted = Boolean.parseBoolean(chatRequest.getAccept());
+        log.info(Boolean.toString(isAccepted));
+        //getting current User uuid from headers to check that the request Id if for him.
+        List<String> uuidList = accessor.getNativeHeader("uuid");
+        chatRequestService.acceptOrRejectChatRequest(requestId, uuidList.get(0), isAccepted);
+
+        //TODO send notification to both user about the CR
+
     }
 
 }

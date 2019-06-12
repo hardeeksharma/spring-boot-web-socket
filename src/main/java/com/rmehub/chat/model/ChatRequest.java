@@ -24,7 +24,12 @@ public class ChatRequest {
     private String id;
 
     private String requestFromUuid;
+    private String senderName;
+
     private String requestToUuid;
+    private String receiverName;
+
+    private String accept;
 
     private boolean isAccepted;
 
