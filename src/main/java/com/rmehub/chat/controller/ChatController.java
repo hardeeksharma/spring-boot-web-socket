@@ -1,15 +1,13 @@
 package com.rmehub.chat.controller;
 
-import java.security.Principal;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import com.rmehub.chat.constant.ResponseCode;
 import com.rmehub.chat.dto.request.NewChat;
 import com.rmehub.chat.dto.response.GenericResponse;
+import com.rmehub.chat.model.ChatChannel;
 import com.rmehub.chat.model.ChatRequest;
 import com.rmehub.chat.service.ChatRequestService;
 import lombok.extern.slf4j.Slf4j;
@@ -21,8 +19,6 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 
 import com.rmehub.chat.model.ChatMessage;
@@ -30,7 +26,6 @@ import com.rmehub.chat.model.ChatMessage;
 @Controller
 @Slf4j
 public class ChatController {
-
 
     @Autowired
     SimpMessagingTemplate simpMessagingTemplate;
@@ -76,10 +71,8 @@ public class ChatController {
         log.info(Boolean.toString(isAccepted));
         //getting current User uuid from headers to check that the request Id if for him.
         List<String> uuidList = accessor.getNativeHeader("uuid");
-        chatRequestService.acceptOrRejectChatRequest(requestId, uuidList.get(0), isAccepted);
+        ChatChannel chatChannel = chatRequestService.acceptOrRejectChatRequest(requestId, uuidList.get(0), isAccepted);
 
         //TODO send notification to both user about the CR
-
     }
-
 }
