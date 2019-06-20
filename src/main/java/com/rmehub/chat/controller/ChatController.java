@@ -48,22 +48,39 @@ public class ChatController {
     @MessageMapping("/chat/request.send.{toUuid}")
     public void sendChatRequest(@Payload ChatRequest chatRequest, @DestinationVariable String toUuid, StompHeaderAccessor accessor) {
 
+        log.info("=========sendChatRequest========= START");
+
         GenericResponse genericResponse;
 
         log.info(chatRequest.toString());
         ChatRequest chatRequestResponse = chatRequestService.save(chatRequest);
-        log.info("Chat request saved");
-        genericResponse = GenericResponse.builder()
-                .isError(false)
-                .statusCode(201)
-                .responseCode(ResponseCode.CHAT_REQUEST_SENT)
-                .build();
 
+        // if chat request is duplicate
+        if (chatRequestResponse.isDuplicate()) {
+            genericResponse = GenericResponse.builder()
+                    .statusCode(409)
+                    .responseCode(ResponseCode.DUPLICATE_REQUEST)
+                    .build();
+
+            log.info("Duplicate chat Request");
+
+        } else {
+            genericResponse = GenericResponse.builder()
+                    .isError(false)
+                    .statusCode(201)
+                    .responseCode(ResponseCode.CHAT_REQUEST_SENT)
+                    .build();
+
+            log.info("Chat request saved");
+        }
 
         //TODO send request notification to receiver via web socket
 
         // chat request ack to the sender
         simpMessagingTemplate.convertAndSend("/topic/request/ack." + chatRequest.getRequestFromUuid(), genericResponse);
+
+        log.info("=========sendChatRequest========= END");
+
     }
 
     @MessageMapping("/chat/request.acceptOrReject.{requestId}")

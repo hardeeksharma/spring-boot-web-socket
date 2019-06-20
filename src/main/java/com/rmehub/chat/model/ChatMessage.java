@@ -1,5 +1,7 @@
 package com.rmehub.chat.model;
 
+import com.rmehub.chat.constant.AttachmentType;
+import com.rmehub.chat.constant.MessageType;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,27 +20,19 @@ public class ChatMessage {
     @Id
     private String id;
     private MessageType type;
-    private String content;
+    private String message;
 
     private ChatUser sender= null;
 
     @CreatedDate
     private Date time;
 
-    boolean isStared;
+    boolean isStared = false;
 
-    boolean isAttachment;
+    boolean isAttachment = false;
 
     AttachmentType attachmentType;
 
     String attachmentURL;
-
-    public enum AttachmentType {
-        PDF, WORD, EXCEL, IMAGE
-    }
-
-    public enum MessageType {
-        CHAT, JOIN, LEAVE
-    }
 
 }

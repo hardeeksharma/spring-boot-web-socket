@@ -38,6 +38,11 @@ public class ChatRequestService {
     ChatChannelService chatChannelService;
 
     public ChatRequest save(ChatRequest chatRequest) {
+
+        if (chatRequestRepository.findByRequestToUuidAndRequestFromUuid(chatRequest.getRequestToUuid(), chatRequest.getRequestFromUuid()).isPresent()) {
+            return  ChatRequest.builder().isDuplicate(true).build();
+        }
+
         return chatRequestRepository.save(chatRequest);
     }
 

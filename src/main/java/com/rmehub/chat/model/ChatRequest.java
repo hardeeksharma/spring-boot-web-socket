@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
@@ -40,6 +41,10 @@ public class ChatRequest {
     private String requestPurpose;
 
     private String rejectReason;
+
+    @Transient
+    @JsonIgnore
+    private boolean isDuplicate;
 
     @CreatedDate
     private Date createdAt;

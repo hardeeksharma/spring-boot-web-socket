@@ -132,11 +132,13 @@
         console.log(message.content);
     }
 
-    function sendChat() {
+    function sendChatMessage(message) {
        var data = {
            isAttachment : false,
-           content : "Hi",
-           channelId:""
+           message : message,
+           channelId:"",
+           messageType : 'CHAT',
+           senderUuid : userData.uuid
        }
     }
 
