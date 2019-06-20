@@ -1,5 +1,6 @@
 package com.rmehub.chat.service;
 
+import com.rmehub.chat.constant.RequestStatus;
 import com.rmehub.chat.model.ChatChannel;
 import com.rmehub.chat.model.ChatRequest;
 import com.rmehub.chat.model.ChatUser;
@@ -55,6 +56,7 @@ public class ChatRequestService {
         }
         if (isAccepted) {
             chatRequest1.setAccepted(true);
+            chatRequest1.setRequestStatus(RequestStatus.ACCEPTED);
             // if the request is accepted
             // 1st find both the users in the chat users system
             // then create a chat channel between them
@@ -62,8 +64,8 @@ public class ChatRequestService {
             Optional<ChatUser> receiverOptional = chatUserRepository.findByUuid(chatRequest1.getRequestToUuid());
             // updating the chat request
 
-
             StringBuilder channelUuid = new StringBuilder(UUID.randomUUID().toString());
+
             chatRequest1 = chatRequestRepository.save(chatRequest1);
 
             StringBuilder partyMd5Hash = new StringBuilder(DigestUtils.md5Hex(senderOptional.get().getUuid() + " : " + receiverOptional.get().getUuid()));
@@ -82,6 +84,9 @@ public class ChatRequestService {
 
         } else {
             chatRequest1.setAccepted(false);
+            chatRequest1.setRequestStatus(RequestStatus.REJECTED);
+            chatRequestRepository.save(chatRequest1);
+
             // not updating because status is already false
         }
 
@@ -89,5 +94,21 @@ public class ChatRequestService {
 
     }
 
+
+    public Optional<?> findMySentChatRequest(String uuid) {
+
+        if (chatRequestRepository.findByRequestFromUuid(uuid).get().isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(chatRequestRepository.findByRequestFromUuid(uuid));
+    }
+
+    public Optional<?> findMyReceivedChatRequest(String uuid) {
+
+        if (chatRequestRepository.findByRequestToUuid(uuid).get().isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(chatRequestRepository.findByRequestToUuid(uuid));
+    }
 
 }

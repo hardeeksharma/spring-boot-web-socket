@@ -42,11 +42,41 @@
 
     stompClient.connect(connect_headers, onConnected, onError);
     //stompClient.debug = null
-    function onConnected() {
+   async function onConnected() {
         //console.log("connected");
-        stompClient.subscribe('/topic/public ', onMessageReceived);
-        stompClient.subscribe('/topic/public.bb2c9039-0ed3-4d6f-b078-db965286944d', receive);
-        stompClient.subscribe(`/topic/request/ack.${userData.uuid}`,notifyMe);
+        //await stompClient.subscribe('/topic/public ', onMessageReceived);
+        //sawait stompClient.subscribe('/topic/public.bb2c9039-0ed3-4d6f-b078-db965286944d', receive);
+        await stompClient.subscribe(`/topic/request/ack.${userData.uuid}`,notifyMe);
+        await stompClient.subscribe(`/app/chat/request.sent.${userData.uuid}`,mySentChatRequests);
+        await stompClient.subscribe(`/app/chat/request.received.${userData.uuid}`,myReceivedChatRequests);
+    }
+
+    function  mySentChatRequests(payload) {
+            console.log("Sent Data Requests")
+            console.log("Sent Data Requests")
+         let response = JSON.parse(payload.body);
+         if(response.statusCode==200){
+             console.log(response.payload.data);
+         }
+         if(response.statusCode == 204){
+             console.log("No Data Found")
+         }
+
+    }
+
+    function  myReceivedChatRequests(payload) {
+
+        console.log("Received chat Requests")
+        console.log("Received chat Requests")
+        console.log("Received chat Requests")
+         let response = JSON.parse(payload.body);
+         if(response.statusCode==200){
+             console.log(response.payload.data);
+         }
+         if(response.statusCode == 204){
+             console.log("No Data Found")
+         }
+
     }
 
     function notifyMe(payload) {
@@ -101,6 +131,15 @@
         var message = JSON.parse(payload.body);
         console.log(message.content);
     }
+
+    function sendChat() {
+       var data = {
+           isAttachment : false,
+           content : "Hi",
+           channelId:""
+       }
+    }
+
 </script>
 
 </html>

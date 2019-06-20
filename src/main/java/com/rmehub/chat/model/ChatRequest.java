@@ -1,6 +1,7 @@
 package com.rmehub.chat.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.rmehub.chat.constant.RequestStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -29,7 +30,10 @@ public class ChatRequest {
     private String requestToUuid;
     private String receiverName;
 
+    @JsonIgnore
     private String accept;
+
+    private RequestStatus requestStatus = RequestStatus.PENDING;
 
     private boolean isAccepted;
 
