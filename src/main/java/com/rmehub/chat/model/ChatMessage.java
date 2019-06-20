@@ -2,10 +2,12 @@ package com.rmehub.chat.model;
 
 import com.rmehub.chat.constant.AttachmentType;
 import com.rmehub.chat.constant.MessageType;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.bson.types.ObjectId;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -15,6 +17,8 @@ import java.util.Date;
 @Data
 @NoArgsConstructor
 @Document
+@AllArgsConstructor
+@Builder
 public class ChatMessage {
 
     @Id
@@ -34,5 +38,6 @@ public class ChatMessage {
     AttachmentType attachmentType;
 
     String attachmentURL;
+
 
 }

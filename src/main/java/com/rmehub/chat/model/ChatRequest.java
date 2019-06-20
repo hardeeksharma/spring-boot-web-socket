@@ -31,7 +31,7 @@ public class ChatRequest {
     private String requestToUuid;
     private String receiverName;
 
-    @JsonIgnore
+    @Transient
     private String accept;
 
     private RequestStatus requestStatus = RequestStatus.PENDING;

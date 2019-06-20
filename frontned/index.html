@@ -3,35 +3,35 @@
 <head>
     <title>Chat Demo in spring</title>
     <script src="http://code.jquery.com/jquery-3.3.1.min.js"
-        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+            integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.3.0/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
 
 </head>
 
 <body>
-    Name : <input type="text" placeholder="Enter name" id="name" /><br />
-    Message:
-    <textarea id="textarea"></textarea>
-    <button onclick="sendChat()" id="send">Send</button>
-    <ul id="chats">
+Name : <input type="text" placeholder="Enter name" id="name"/><br/>
+Message:
+<textarea id="textarea"></textarea>
+<button onclick="sendChat()" id="send">Send</button>
+<ul id="chats">
 
-    </ul>
+</ul>
 </body>
 <script type="text/javascript">
     var stomp = null;
     var socket = new SockJS('http://127.0.0.1:8080/chatWS');
     stompClient = Stomp.over(socket);
 
-    var userData ={
-        "uuid" : "bb2c9039-0ed3-4d6f",
-        "fullName" : "Hardeek Sharma",
-        "jwt" : "my-jwt-token"
+    var userData = {
+        "uuid": "bb2c9039-0ed3-4d6f",
+        "fullName": "Hardeek Sharma",
+        "jwt": "my-jwt-token"
     }
     var connect_headers = {
-        "uuid" : userData.uuid,
-        "fullName" : userData.fullName,
-        "jwt" : userData.jwt
+        "uuid": userData.uuid,
+        "fullName": userData.fullName,
+        "jwt": userData.jwt
     }
     // var header = {
     //     "sender-name": "",
@@ -42,40 +42,44 @@
 
     stompClient.connect(connect_headers, onConnected, onError);
     //stompClient.debug = null
-   async function onConnected() {
+    async function onConnected() {
         //console.log("connected");
         //await stompClient.subscribe('/topic/public ', onMessageReceived);
         //sawait stompClient.subscribe('/topic/public.bb2c9039-0ed3-4d6f-b078-db965286944d', receive);
-        await stompClient.subscribe(`/topic/request/ack.${userData.uuid}`,notifyMe);
-        await stompClient.subscribe(`/app/chat/request.sent.${userData.uuid}`,mySentChatRequests);
-        await stompClient.subscribe(`/app/chat/request.received.${userData.uuid}`,myReceivedChatRequests);
-    }
+        await stompClient.subscribe(`/topic/request/ack.${userData.uuid}`, notifyMe);
+        await stompClient.subscribe(`/app/chat/request.sent.${userData.uuid}`, mySentChatRequests);
+        await stompClient.subscribe(`/app/chat/request.received.${userData.uuid}`, myReceivedChatRequests);
 
-    function  mySentChatRequests(payload) {
-            console.log("Sent Data Requests")
-            console.log("Sent Data Requests")
-         let response = JSON.parse(payload.body);
-         if(response.statusCode==200){
-             console.log(response.payload.data);
-         }
-         if(response.statusCode == 204){
-             console.log("No Data Found")
-         }
+        stompClient.subscribe('/queue/chat.e8bb1a53-1721-4e04-b5b4-056b2ebce73f', chatHandler);
 
     }
 
-    function  myReceivedChatRequests(payload) {
+
+    function mySentChatRequests(payload) {
+        console.log("Sent Data Requests")
+        console.log("Sent Data Requests")
+        let response = JSON.parse(payload.body);
+        if (response.statusCode == 200) {
+            console.log(response.payload.data);
+        }
+        if (response.statusCode == 204) {
+            console.log("No Data Found")
+        }
+
+    }
+
+    function myReceivedChatRequests(payload) {
 
         console.log("Received chat Requests")
         console.log("Received chat Requests")
         console.log("Received chat Requests")
-         let response = JSON.parse(payload.body);
-         if(response.statusCode==200){
-             console.log(response.payload.data);
-         }
-         if(response.statusCode == 204){
-             console.log("No Data Found")
-         }
+        let response = JSON.parse(payload.body);
+        if (response.statusCode == 200) {
+            console.log(response.payload.data);
+        }
+        if (response.statusCode == 204) {
+            console.log("No Data Found")
+        }
 
     }
 
@@ -84,7 +88,8 @@
 
         switch (response.responseCode) {
 
-            case 'CHAT_REQUEST_SENT': console.log("OK OK OK")
+            case 'CHAT_REQUEST_SENT':
+                console.log("OK OK OK")
 
         }
     }
@@ -102,28 +107,28 @@
         username = $("#name").val();
         stompClient.send("/app/chat",
             {},
-            JSON.stringify({ sender: username, type: 'JOIN', content: message.trim() })
+            JSON.stringify({sender: username, type: 'JOIN', content: message.trim()})
         )
     }
 
     function sendChatRequest() {
         var chatRequest = {
             requestFromUuid: userData.uuid,
-            senderName : "Hardeek Sharma",
+            senderName: "Hardeek Sharma",
             requestToUuid: "bb2c9039-0ed3-4d6f-b078-db965286944d",
-            receiverName : "Sanu Bhattacharya",
+            receiverName: "Sanu Bhattacharya",
             requestPurpose: " this is my request purpose"
         }
-        stompClient.send(`/app/chat/request.send.${chatRequest.requestToUuid}`, connect_headers,JSON.stringify(chatRequest));
+        stompClient.send(`/app/chat/request.send.${chatRequest.requestToUuid}`, connect_headers, JSON.stringify(chatRequest));
     }
 
-    function acceptOrRejectChatRequest(chatRequestId,isAccepted) {
+    function acceptOrRejectChatRequest(chatRequestId, isAccepted) {
 
         var data = {
-            accept : isAccepted
+            accept: isAccepted
         }
         console.log(data)
-        stompClient.send(`/app/chat/request.acceptOrReject.${chatRequestId}`, connect_headers,JSON.stringify(data));
+        stompClient.send(`/app/chat/request.acceptOrReject.${chatRequestId}`, connect_headers, JSON.stringify(data));
     }
 
     function onMessageReceived(payload) {
@@ -133,14 +138,24 @@
     }
 
     function sendChatMessage(message) {
-       var data = {
-           isAttachment : false,
-           message : message,
-           channelId:"",
-           messageType : 'CHAT',
-           senderUuid : userData.uuid
-       }
+        var chatData = {
+            isAttachment: false,
+            message: message,
+            channelId: "e8bb1a53-1721-4e04-b5b4-056b2ebce73f",
+            messageType: 'CHAT',
+            senderUuid: userData.uuid
+        }
+        stompClient.send(`/app/chat/message.send.${chatData.channelId}`, connect_headers, JSON.stringify(chatData));
     }
+
+    function chatHandler(payload) {
+
+        console.log("CHAT handler")
+        console.log("CHAT handler")
+
+        console.log(JSON.parse(payload.body))
+    }
+
 
 </script>
 

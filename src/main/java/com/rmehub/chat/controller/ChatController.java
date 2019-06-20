@@ -12,6 +12,7 @@ import com.rmehub.chat.dto.request.NewChat;
 import com.rmehub.chat.dto.response.GenericResponse;
 import com.rmehub.chat.model.ChatChannel;
 import com.rmehub.chat.model.ChatRequest;
+import com.rmehub.chat.service.ChatMessageService;
 import com.rmehub.chat.service.ChatRequestService;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
@@ -36,6 +37,9 @@ public class ChatController {
 
     @Autowired
     ChatRequestService chatRequestService;
+
+    @Autowired
+    ChatMessageService chatMessageService;
 
     @MessageMapping("/chat")
     @SendTo("/topic/public")
@@ -87,6 +91,7 @@ public class ChatController {
     private void acceptOrRejectChatRequest(@DestinationVariable String requestId, @Payload ChatRequest chatRequest, StompHeaderAccessor accessor) {
 
         log.info(requestId);
+        System.out.println(chatRequest);
         boolean isAccepted = Boolean.parseBoolean(chatRequest.getAccept());
         log.info(Boolean.toString(isAccepted));
         //getting current User uuid from headers to check that the request Id if for him.
@@ -99,11 +104,17 @@ public class ChatController {
 
     @MessageMapping("/chat/message.send.{channelId}")
     @SendTo("/queue/chat.{channelId}")
-    private ChatMessageDto sendChatMessage(@Payload ChatMessageDto chatMessageDto, @DestinationVariable String channelId) {
+    private ChatMessage sendChatMessage(@Payload ChatMessageDto chatMessageDto, @DestinationVariable String channelId) {
+
+        log.info("=========== SEND CHAT MESSAGE ========== START");
 
         System.out.println(chatMessageDto);
 
-        return chatMessageDto;
+        ChatMessage chatMessage = chatMessageService.save(chatMessageDto);
+
+        log.info("=========== SEND CHAT MESSAGE ========== END");
+
+        return chatMessage;
     }
 
     @SubscribeMapping("/chat/request.sent.{uuid}")
