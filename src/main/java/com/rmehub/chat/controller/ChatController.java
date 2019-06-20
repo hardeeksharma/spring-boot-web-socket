@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.rmehub.chat.constant.ResponseCode;
+import com.rmehub.chat.dto.request.ChatMessageDto;
 import com.rmehub.chat.dto.request.NewChat;
 import com.rmehub.chat.dto.response.GenericResponse;
 import com.rmehub.chat.model.ChatChannel;
@@ -45,8 +46,7 @@ public class ChatController {
     }
 
     @MessageMapping("/chat/request.send.{toUuid}")
-    @SendTo("/chat/request.receive.{toUuid}")
-    public GenericResponse sendChatRequest(@Payload ChatRequest chatRequest, @DestinationVariable String toUuid, StompHeaderAccessor accessor) {
+    public void sendChatRequest(@Payload ChatRequest chatRequest, @DestinationVariable String toUuid, StompHeaderAccessor accessor) {
 
         GenericResponse genericResponse;
 
@@ -58,13 +58,12 @@ public class ChatController {
                 .statusCode(201)
                 .responseCode(ResponseCode.CHAT_REQUEST_SENT)
                 .build();
+
+
         //TODO send request notification to receiver via web socket
+
+        // chat request ack to the sender
         simpMessagingTemplate.convertAndSend("/topic/request/ack." + chatRequest.getRequestFromUuid(), genericResponse);
-
-        genericResponse = GenericResponse.builder().statusCode(201)
-                .responseCode(ResponseCode.NEW_CHAT_REQUEST).build();
-
-        return genericResponse;
     }
 
     @MessageMapping("/chat/request.acceptOrReject.{requestId}")
@@ -83,11 +82,11 @@ public class ChatController {
 
     @MessageMapping("/chat/message.send.{channelId}")
     @SendTo("/queue/chat.{channelId}")
-    private ChatMessage sendChatMessage(@Payload ChatMessage chatMessage, @DestinationVariable String channelId) {
+    private ChatMessageDto sendChatMessage(@Payload ChatMessageDto chatMessageDto, @DestinationVariable String channelId) {
 
-        System.out.println(chatMessage);
+        System.out.println(chatMessageDto);
 
-        return chatMessage;
+        return chatMessageDto;
     }
 
     @SubscribeMapping("/chat/request.sent.{uuid}")
