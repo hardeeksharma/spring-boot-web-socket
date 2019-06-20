@@ -121,6 +121,7 @@ public class ChatController {
         Optional<?> mySentChatRequest = chatRequestService.findMyReceivedChatRequest(uuid);
         GenericResponse response = null;
 
+
         HashMap<String, Object> data = new HashMap<>();
         if (mySentChatRequest.isPresent()) {
             data.put("data", mySentChatRequest.get());
