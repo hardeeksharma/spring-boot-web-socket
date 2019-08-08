@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<script type="text/javascript">
+    fetch('https://api.postalpincode.in/pincode/110001')
+        .then(response => response.json())
+    .then(data => {
+        console.log(data) // Prints result from `response.json()` in getRequest
+    });
+</script>
+</body>
+</html>

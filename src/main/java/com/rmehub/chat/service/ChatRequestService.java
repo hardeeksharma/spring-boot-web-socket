@@ -1,6 +1,8 @@
 package com.rmehub.chat.service;
 
 import com.rmehub.chat.constant.RequestStatus;
+import com.rmehub.chat.constant.ResponseCode;
+import com.rmehub.chat.exception.ChatRequestException;
 import com.rmehub.chat.model.ChatChannel;
 import com.rmehub.chat.model.ChatRequest;
 import com.rmehub.chat.model.ChatUser;
@@ -11,8 +13,6 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -37,27 +37,31 @@ public class ChatRequestService {
     @Autowired
     ChatChannelService chatChannelService;
 
+    public Optional<ChatRequest> findByRequestId(String id) {
+        return chatRequestRepository.findById(id);
+    }
+
     public ChatRequest save(ChatRequest chatRequest) {
 
         if (chatRequestRepository.findByRequestToUuidAndRequestFromUuid(chatRequest.getRequestToUuid(), chatRequest.getRequestFromUuid()).isPresent()) {
-            return  ChatRequest.builder().isDuplicate(true).build();
+            return ChatRequest.builder().isDuplicate(true).build();
         }
 
         return chatRequestRepository.save(chatRequest);
     }
 
-    public ChatChannel acceptOrRejectChatRequest(String chatRequestId, String toUuid, boolean isAccepted) {
+    public ChatChannel acceptOrRejectChatRequest(String chatRequestId, String toUuid, boolean isAccepted) throws ChatRequestException {
         Optional<ChatRequest> request = chatRequestRepository.findById(chatRequestId);
         ChatChannel chatChannel = null;
         if (!request.isPresent()) {
             log.error("No request found for this request ID");
-            // TODO handle chat request not found by ID
+            throw new ChatRequestException("No ChatRequest found", ResponseCode.NOT_FOUND);
         }
         log.info("Chat Request Found");
         ChatRequest chatRequest1 = request.get();
         if (!chatRequest1.getRequestToUuid().equals(toUuid)) {
-            //TODO this chat ID is not his chat Request
             log.error("Chat request does not belong to him");
+            throw new ChatRequestException("", ResponseCode.CHAT_REQUEST_MISMATCH);
         }
         if (isAccepted) {
             chatRequest1.setAccepted(true);
