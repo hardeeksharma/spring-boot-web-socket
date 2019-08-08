@@ -49,6 +49,9 @@ Message:
         await stompClient.subscribe(`/topic/request/ack.${userData.uuid}`,notifyMe);
         await stompClient.subscribe(`/app/chat/request.sent.${userData.uuid}`,mySentChatRequests);
         await stompClient.subscribe(`/app/chat/request.received.${userData.uuid}`,myReceivedChatRequests);
+
+        stompClient.subscribe('/queue/chat.e8bb1a53-1721-4e04-b5b4-056b2ebce73f', chatHandler);
+
     }
 
     function  mySentChatRequests(payload) {
@@ -131,6 +134,25 @@ Message:
         console.log("#####################");
         var message = JSON.parse(payload.body);
         console.log(message.content);
+    }
+
+    function chatHandler(payload) {
+
+        console.log("CHAT handler");
+        console.log("CHAT handler");
+
+        console.log(JSON.parse(payload.body))
+    }
+
+    function sendChatMessage(message) {
+        var chatData = {
+            isAttachment: false,
+            message: message,
+            channelId: "e8bb1a53-1721-4e04-b5b4-056b2ebce73f",
+            messageType: 'CHAT',
+            senderUuid: userData.uuid
+        }
+        stompClient.send(`/app/chat/message.send.${chatData.channelId}`, connect_headers, JSON.stringify(chatData));
     }
 </script>
 

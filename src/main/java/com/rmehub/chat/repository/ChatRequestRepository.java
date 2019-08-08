@@ -10,4 +10,6 @@ public interface ChatRequestRepository extends MongoRepository<ChatRequest,Strin
 
     Optional<List<ChatRequest>> findByRequestFromUuid(String s);
     Optional<List<ChatRequest>> findByRequestToUuid(String s);
+
+    Optional<ChatRequest> findByRequestToUuidAndRequestFromUuid(String ruuid, String suuid);
 }

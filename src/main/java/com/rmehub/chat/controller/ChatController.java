@@ -12,6 +12,7 @@ import com.rmehub.chat.dto.request.NewChat;
 import com.rmehub.chat.dto.response.GenericResponse;
 import com.rmehub.chat.model.ChatChannel;
 import com.rmehub.chat.model.ChatRequest;
+import com.rmehub.chat.service.ChatMessageService;
 import com.rmehub.chat.service.ChatRequestService;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
@@ -37,6 +38,9 @@ public class ChatController {
     @Autowired
     ChatRequestService chatRequestService;
 
+    @Autowired
+    ChatMessageService chatMessageService;
+
     @MessageMapping("/chat")
     @SendTo("/topic/public")
     public NewChat sendMessage(@Payload NewChat chatMessage) {
@@ -48,28 +52,46 @@ public class ChatController {
     @MessageMapping("/chat/request.send.{toUuid}")
     public void sendChatRequest(@Payload ChatRequest chatRequest, @DestinationVariable String toUuid, StompHeaderAccessor accessor) {
 
+        log.info("=========sendChatRequest========= START");
+
         GenericResponse genericResponse;
 
         log.info(chatRequest.toString());
         ChatRequest chatRequestResponse = chatRequestService.save(chatRequest);
-        log.info("Chat request saved");
-        genericResponse = GenericResponse.builder()
-                .isError(false)
-                .statusCode(201)
-                .responseCode(ResponseCode.CHAT_REQUEST_SENT)
-                .build();
 
+        // if chat request is duplicate
+        if (chatRequestResponse.isDuplicate()) {
+            genericResponse = GenericResponse.builder()
+                    .statusCode(409)
+                    .responseCode(ResponseCode.DUPLICATE_REQUEST)
+                    .build();
+
+            log.info("Duplicate chat Request");
+
+        } else {
+            genericResponse = GenericResponse.builder()
+                    .isError(false)
+                    .statusCode(201)
+                    .responseCode(ResponseCode.CHAT_REQUEST_SENT)
+                    .build();
+
+            log.info("Chat request saved");
+        }
 
         //TODO send request notification to receiver via web socket
 
         // chat request ack to the sender
         simpMessagingTemplate.convertAndSend("/topic/request/ack." + chatRequest.getRequestFromUuid(), genericResponse);
+
+        log.info("=========sendChatRequest========= END");
+
     }
 
     @MessageMapping("/chat/request.acceptOrReject.{requestId}")
     private void acceptOrRejectChatRequest(@DestinationVariable String requestId, @Payload ChatRequest chatRequest, StompHeaderAccessor accessor) {
 
         log.info(requestId);
+        System.out.println(chatRequest);
         boolean isAccepted = Boolean.parseBoolean(chatRequest.getAccept());
         log.info(Boolean.toString(isAccepted));
         //getting current User uuid from headers to check that the request Id if for him.
@@ -82,11 +104,17 @@ public class ChatController {
 
     @MessageMapping("/chat/message.send.{channelId}")
     @SendTo("/queue/chat.{channelId}")
-    private ChatMessageDto sendChatMessage(@Payload ChatMessageDto chatMessageDto, @DestinationVariable String channelId) {
+    private ChatMessage sendChatMessage(@Payload ChatMessageDto chatMessageDto, @DestinationVariable String channelId) {
+
+        log.info("=========== SEND CHAT MESSAGE ========== START");
 
         System.out.println(chatMessageDto);
 
-        return chatMessageDto;
+        ChatMessage chatMessage = chatMessageService.save(chatMessageDto);
+
+        log.info("=========== SEND CHAT MESSAGE ========== END");
+
+        return chatMessage;
     }
 
     @SubscribeMapping("/chat/request.sent.{uuid}")
