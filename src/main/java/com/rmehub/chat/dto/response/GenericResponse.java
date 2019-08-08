@@ -19,7 +19,7 @@ public class GenericResponse {
     private int statusCode = 200;
     private boolean isError = false;
     private ResponseCode responseCode;
-    private Map<String,Object> payload  = new HashMap<>();
-
+    private Map<String, Object> payload = new HashMap<>();
+    private String message;
 
 }

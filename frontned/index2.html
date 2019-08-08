@@ -113,10 +113,10 @@ Message:
     function sendChatRequest() {
         var chatRequest = {
             requestFromUuid: userData.uuid,
-            senderName : "Hardeek Sharma",
-            requestToUuid: "bb2c9039-0ed3-4d6f",
+            senderName : "Rahul Gandhi",
+            requestToUuid: "4c951900-9a51-4e97-bfe3-c141a176fe84",
             receiverName : "Sanu Bhattacharya",
-            requestPurpose: " this is my request purpose"
+            requestPurpose: "Mujhe Tumse kuch baat krni hai"
         }
         stompClient.send(`/app/chat/request.send.${chatRequest.requestToUuid}`, connect_headers,JSON.stringify(chatRequest));
     }

@@ -6,10 +6,13 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import java.util.List;
 import java.util.Optional;
 
-public interface ChatRequestRepository extends MongoRepository<ChatRequest,String> {
+public interface ChatRequestRepository extends MongoRepository<ChatRequest, String> {
 
     Optional<List<ChatRequest>> findByRequestFromUuid(String s);
+
     Optional<List<ChatRequest>> findByRequestToUuid(String s);
 
     Optional<ChatRequest> findByRequestToUuidAndRequestFromUuid(String ruuid, String suuid);
+
+    Optional<ChatRequest> findById(String id);
 }
