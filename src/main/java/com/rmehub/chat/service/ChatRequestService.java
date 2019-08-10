@@ -50,8 +50,10 @@ public class ChatRequestService {
         return chatRequestRepository.save(chatRequest);
     }
 
-    public ChatChannel acceptOrRejectChatRequest(String chatRequestId, String toUuid, boolean isAccepted) throws ChatRequestException {
+    public ChatChannel acceptOrRejectChatRequest(String chatRequestId, String toUuid, boolean isAccepted, ChatRequest cr) throws ChatRequestException {
         Optional<ChatRequest> request = chatRequestRepository.findById(chatRequestId);
+
+        log.info("acceptOrRejectChatRequest "+cr.toString());
         ChatChannel chatChannel = null;
         if (!request.isPresent()) {
             log.error("No request found for this request ID");
@@ -94,9 +96,9 @@ public class ChatRequestService {
         } else {
             chatRequest1.setAccepted(false);
             chatRequest1.setRequestStatus(RequestStatus.REJECTED);
+            chatRequest1.setRejectReason(cr.getRejectReason());
             chatRequestRepository.save(chatRequest1);
-
-            // not updating because status is already false
+            log.info("Chat Request rejected : " + chatRequest1.toString());
         }
 
         return chatChannel;

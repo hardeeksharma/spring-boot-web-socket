@@ -101,7 +101,7 @@ public class ChatController {
     private void acceptOrRejectChatRequest(@DestinationVariable String requestId, @Payload ChatRequest chatRequest, StompHeaderAccessor accessor) {
 
         log.info(requestId);
-        System.out.println(chatRequest);
+        //System.out.println(chatRequest);
         GenericResponse genericResponse;
         boolean isAccepted = Boolean.parseBoolean(chatRequest.getAccept());
         log.info(Boolean.toString(isAccepted));
@@ -109,12 +109,12 @@ public class ChatController {
         try {
             List<String> uuidList = accessor.getNativeHeader("uuid");
             Optional<ChatRequest> optionalChatRequest = chatRequestService.findByRequestId(requestId);
-            ChatChannel chatChannel = chatRequestService.acceptOrRejectChatRequest(requestId, uuidList.get(0), isAccepted);
+            ChatChannel chatChannel = chatRequestService.acceptOrRejectChatRequest(requestId, uuidList.get(0), isAccepted,chatRequest);
 
-            if (isAccepted) {
+            if (isAccepted) { // handle if chat request is accepted
 
 
-            } else { // handling if cha request is rejected
+            } else { // handling if chat request is rejected
 
                 HashMap<String, Object> data = new HashMap<>();
                 data.put("data", optionalChatRequest.get());
@@ -125,6 +125,8 @@ public class ChatController {
                         .responseCode(ResponseCode.CHAT_REQUEST_REJECTED)
                         .payload(data)
                         .build();
+
+                log.info("ACK : "+ genericResponse.toString());
 
                 // sending notification to sender
                 simpMessagingTemplate.convertAndSend("/topic/request/ack." + optionalChatRequest.get().getRequestFromUuid(), genericResponse);
