@@ -167,7 +167,7 @@ public class ChatController {
 
         System.out.println(chatMessageDto);
 
-        ChatMessage chatMessage = chatMessageService.save(chatMessageDto);
+        ChatMessage chatMessage = chatMessageService.save(chatMessageDto,channelId);
 
         log.info("=========== SEND CHAT MESSAGE ========== END");
 

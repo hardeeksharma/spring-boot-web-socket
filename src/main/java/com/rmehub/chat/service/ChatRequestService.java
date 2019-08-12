@@ -6,8 +6,10 @@ import com.rmehub.chat.exception.ChatRequestException;
 import com.rmehub.chat.model.ChatChannel;
 import com.rmehub.chat.model.ChatRequest;
 import com.rmehub.chat.model.ChatUser;
+import com.rmehub.chat.model.UserChannelMapper;
 import com.rmehub.chat.repository.ChatRequestRepository;
 import com.rmehub.chat.repository.ChatUserRepository;
+import com.rmehub.chat.repository.UserChannelMapperRepo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +39,9 @@ public class ChatRequestService {
     @Autowired
     ChatChannelService chatChannelService;
 
+    @Autowired
+    UserChannelMapperRepo userChannelMapperRepo;
+
     public Optional<ChatRequest> findByRequestId(String id) {
         return chatRequestRepository.findById(id);
     }
@@ -53,7 +58,7 @@ public class ChatRequestService {
     public ChatChannel acceptOrRejectChatRequest(String chatRequestId, String toUuid, boolean isAccepted, ChatRequest cr) throws ChatRequestException {
         Optional<ChatRequest> request = chatRequestRepository.findById(chatRequestId);
 
-        log.info("acceptOrRejectChatRequest "+cr.toString());
+        log.info("acceptOrRejectChatRequest " + cr.toString());
         ChatChannel chatChannel = null;
         if (!request.isPresent()) {
             log.error("No request found for this request ID");
@@ -90,6 +95,14 @@ public class ChatRequestService {
                     .build();
 
             chatChannel = chatChannelService.createChatChannel(chatChannel);
+
+            UserChannelMapper userChannelMapper = UserChannelMapper.builder()
+                    .chatChannel(chatChannel)
+                    .user1Uuid(senderOptional.get().getUuid())
+                    .user2Uuid(receiverOptional.get().getUuid())
+                    .build();
+            userChannelMapperRepo.save(userChannelMapper);
+
             log.info("Chat Channel Created " + chatChannel.toString());
             log.info("Request Updated");
 
@@ -122,4 +135,11 @@ public class ChatRequestService {
         return Optional.ofNullable(chatRequestRepository.findByRequestToUuid(uuid));
     }
 
+    public Optional<?> findMySentReceivedChatRequest(String uuid) {
+
+        if (chatRequestRepository.findByRequestFromUuid(uuid).get().isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(chatRequestRepository.findByRequestFromUuid(uuid));
+    }
 }

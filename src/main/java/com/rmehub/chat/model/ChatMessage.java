@@ -26,7 +26,7 @@ public class ChatMessage {
     private MessageType type;
     private String message;
 
-    private ChatUser sender= null;
+    private ChatUser sender = null;
 
     @CreatedDate
     private Date time;
