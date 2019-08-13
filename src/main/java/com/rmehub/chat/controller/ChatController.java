@@ -10,6 +10,7 @@ import com.rmehub.chat.model.ChatMessage;
 import com.rmehub.chat.model.ChatRequest;
 import com.rmehub.chat.service.ChatMessageService;
 import com.rmehub.chat.service.ChatRequestService;
+import com.sun.tools.javah.Gen;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -109,9 +110,18 @@ public class ChatController {
         try {
             List<String> uuidList = accessor.getNativeHeader("uuid");
             Optional<ChatRequest> optionalChatRequest = chatRequestService.findByRequestId(requestId);
-            ChatChannel chatChannel = chatRequestService.acceptOrRejectChatRequest(requestId, uuidList.get(0), isAccepted,chatRequest);
+            ChatChannel chatChannel = chatRequestService.acceptOrRejectChatRequest(requestId, uuidList.get(0), isAccepted, chatRequest);
 
             if (isAccepted) { // handle if chat request is accepted
+
+                genericResponse = GenericResponse.builder()
+                        .statusCode(200)
+                        .isError(false)
+                        .responseCode(ResponseCode.CR_ACCEPT_SUCCESS)
+                        .build();
+
+                simpMessagingTemplate.convertAndSend("/topic/request/ack." + optionalChatRequest.get().getRequestFromUuid(), genericResponse);
+                simpMessagingTemplate.convertAndSend("/topic/request/ack." + optionalChatRequest.get().getRequestToUuid(), genericResponse);
 
 
             } else { // handling if chat request is rejected
@@ -126,7 +136,7 @@ public class ChatController {
                         .payload(data)
                         .build();
 
-                log.info("ACK : "+ genericResponse.toString());
+                log.info("ACK : " + genericResponse.toString());
 
                 // sending notification to sender
                 simpMessagingTemplate.convertAndSend("/topic/request/ack." + optionalChatRequest.get().getRequestFromUuid(), genericResponse);
@@ -154,9 +164,9 @@ public class ChatController {
             simpMessagingTemplate.convertAndSend("/topic/request/ack." + chatRequest.getRequestToUuid(), genericResponse);
         }
 
-
-        //TODO send notification about chat channel in ACK socket connection
-        //TODO send notification to both user about the CR
+//
+//        TODO send notification about chat channel in ACK socket connection
+//        TODO send notification to both user about the CR
     }
 
     @MessageMapping("/chat/message.send.{channelId}")
@@ -167,7 +177,7 @@ public class ChatController {
 
         System.out.println(chatMessageDto);
 
-        ChatMessage chatMessage = chatMessageService.save(chatMessageDto,channelId);
+        ChatMessage chatMessage = chatMessageService.save(chatMessageDto, channelId);
 
         log.info("=========== SEND CHAT MESSAGE ========== END");
 

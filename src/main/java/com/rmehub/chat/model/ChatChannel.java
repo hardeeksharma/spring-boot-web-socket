@@ -29,10 +29,8 @@ public class ChatChannel {
     @Indexed
     private String channelId; // Create Random Chat channel ID
 
-    @DBRef
     private ChatUser sender;
 
-    @DBRef
     private ChatUser receiver;
 
     private Date lastChatTimeStamp;

@@ -2,11 +2,11 @@ package com.rmehub.chat.controller;
 
 import com.rmehub.chat.constant.ResponseCode;
 import com.rmehub.chat.dto.response.GenericResponse;
-import com.rmehub.chat.exception.ChatRequestException;
-import com.rmehub.chat.model.ChatRequest;
-import com.rmehub.chat.model.UserChannelMapper;
+import com.rmehub.chat.exception.ChatChannelException;
+import com.rmehub.chat.model.ChatChannel;
 import com.rmehub.chat.repository.ChatRequestRepository;
-import com.rmehub.chat.repository.UserChannelMapperRepo;
+import com.rmehub.chat.responseDto.ChatChannelListResponse;
+import com.rmehub.chat.service.ChatChannelService;
 import com.rmehub.chat.service.ChatRequestService;
 import com.rmehub.chat.service.UserChannelMapperService;
 import lombok.extern.slf4j.Slf4j;
@@ -15,8 +15,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.client.ResponseExtractor;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
@@ -34,6 +34,9 @@ public class RestController {
 
     @Autowired
     UserChannelMapperService userChannelMapperService;
+
+    @Autowired
+    ChatChannelService chatChannelService;
 
     @GetMapping("chatRequest/{uuid}")
     ResponseEntity<?> getMyChatRequests(@PathVariable("uuid") String uuid) {
@@ -93,12 +96,11 @@ public class RestController {
     @GetMapping("chatChannels/{uuid}")
     ResponseEntity<?> getMyChatChannels(@PathVariable("uuid") String uuid) {
 
-        GenericResponse genericResponse = null;
-        List<UserChannelMapper> userChannelMapperList = null;
+        GenericResponse genericResponse;
+        List<ChatChannelListResponse> allMyChannels = null;
         try {
-            userChannelMapperList = userChannelMapperService.findMyChannels(uuid);
-
-        } catch (ChatRequestException ex) {
+            allMyChannels = chatChannelService.findAllMyChannels(uuid);
+        } catch (ChatChannelException ex) {
 
             if (ex.getResponseCode() == ResponseCode.NOT_FOUND) {
                 genericResponse = GenericResponse.builder()
@@ -114,11 +116,20 @@ public class RestController {
 
             genericResponse = GenericResponse.builder().statusCode(404).isError(true)
                     .responseCode(ResponseCode.FATAL_EXCEPTION).build();
-            return ResponseEntity.badRequest().body(genericResponse);
+            return ResponseEntity.ok().body(genericResponse);
 
         }
 
-        return ResponseEntity.ok().body(userChannelMapperList);
+        HashMap<String, Object> data = new HashMap<>();
+        data.put("channels", allMyChannels);
+        genericResponse = GenericResponse.builder()
+                .responseCode(ResponseCode.CHANNEL_FOUND)
+                .isError(false)
+                .statusCode(200)
+                .payload(data)
+                .build();
+
+        return ResponseEntity.ok().body(genericResponse);
     }
 
 }

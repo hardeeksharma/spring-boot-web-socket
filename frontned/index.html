@@ -43,20 +43,15 @@ Message:
     // }
 
     stompClient.connect(connect_headers, onConnected, onError);
-    //stompClient.debug = null
-    async
 
+    //stompClient.debug = null
     function onConnected() {
         //console.log("connected");
         //await stompClient.subscribe('/topic/public ', onMessageReceived);
         //sawait stompClient.subscribe('/topic/public.bb2c9039-0ed3-4d6f-b078-db965286944d', receive);
-        await
         stompClient.subscribe(`/topic/request/ack.${userData.uuid}`, notifyMe);
-        await
         stompClient.subscribe(`/app/chat/request.sent.${userData.uuid}`, mySentChatRequests);
-        await
         stompClient.subscribe(`/app/chat/request.received.${userData.uuid}`, myReceivedChatRequests);
-
         stompClient.subscribe('/queue/chat.e8bb1a53-1721-4e04-b5b4-056b2ebce73f', chatHandler);
 
     }
