@@ -7,16 +7,19 @@ import com.rmehub.chat.model.ChatChannel;
 import com.rmehub.chat.model.ChatMapper;
 import com.rmehub.chat.repository.ChatRequestRepository;
 import com.rmehub.chat.responseDto.ChatChannelListResponse;
+import com.rmehub.chat.responseDto.ChatResponseDto;
 import com.rmehub.chat.service.ChatChannelService;
 import com.rmehub.chat.service.ChatMapperService;
 import com.rmehub.chat.service.ChatRequestService;
 import com.rmehub.chat.service.UserChannelMapperService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -138,11 +141,12 @@ public class RestController {
     }
 
     @GetMapping("/channel/{channelId}/chat")
-    ResponseEntity<?> getChannelChat(@PathVariable("channelId") String channelId) {
+    ResponseEntity<?> getChannelChat(@PathVariable("channelId") String channelId ,
+                                     @RequestParam Integer pageNo , @RequestParam Integer size) {
         GenericResponse response;
-        List<ChatMapper> chatMapper;
+        ChatResponseDto chatMapper;
         try {
-            chatMapper = chatMapperService.getChannelChat(channelId);
+            chatMapper = chatMapperService.getChannelChat(channelId , pageNo , size);
         } catch (ChatChannelException ex) {
             response = GenericResponse.builder()
                     .isError(true)
