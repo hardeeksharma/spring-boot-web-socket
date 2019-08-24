@@ -22,6 +22,16 @@ public class ChatChannelService {
     @Autowired
     ChatChannelRepo chatChannelRepo;
 
+    public boolean isChannelExist(String channelId) {
+
+//        Optional<ChatChannel> optional = chatChannelRepo.findByChannelId(channelId);
+
+        return chatChannelRepo.findByChannelId(channelId).isPresent() ? true : false;
+
+//        return optional.isPresent() ? true : false;
+//        return true;
+    }
+
     public ChatChannel createChatChannel(ChatChannel chatChannel) {
         return chatChannelRepo.save(chatChannel);
     }

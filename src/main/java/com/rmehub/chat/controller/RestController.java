@@ -4,9 +4,11 @@ import com.rmehub.chat.constant.ResponseCode;
 import com.rmehub.chat.dto.response.GenericResponse;
 import com.rmehub.chat.exception.ChatChannelException;
 import com.rmehub.chat.model.ChatChannel;
+import com.rmehub.chat.model.ChatMapper;
 import com.rmehub.chat.repository.ChatRequestRepository;
 import com.rmehub.chat.responseDto.ChatChannelListResponse;
 import com.rmehub.chat.service.ChatChannelService;
+import com.rmehub.chat.service.ChatMapperService;
 import com.rmehub.chat.service.ChatRequestService;
 import com.rmehub.chat.service.UserChannelMapperService;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +39,9 @@ public class RestController {
 
     @Autowired
     ChatChannelService chatChannelService;
+
+    @Autowired
+    ChatMapperService chatMapperService;
 
     @GetMapping("chatRequest/{uuid}")
     ResponseEntity<?> getMyChatRequests(@PathVariable("uuid") String uuid) {
@@ -130,6 +135,46 @@ public class RestController {
                 .build();
 
         return ResponseEntity.ok().body(genericResponse);
+    }
+
+    @GetMapping("/channel/{channelId}/chat")
+    ResponseEntity<?> getChannelChat(@PathVariable("channelId") String channelId) {
+        GenericResponse response;
+        List<ChatMapper> chatMapper;
+        try {
+            chatMapper = chatMapperService.getChannelChat(channelId);
+        } catch (ChatChannelException ex) {
+            response = GenericResponse.builder()
+                    .isError(true)
+                    .statusCode(404)
+                    .responseCode(ex.getResponseCode())
+                    .message(ex.getMessage())
+                    .build();
+            return ResponseEntity.badRequest().body(response);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+
+            response = GenericResponse.builder()
+                    .isError(true)
+                    .statusCode(500)
+                    .responseCode(ResponseCode.FATAL_EXCEPTION)
+                    .message("Fatal Exception")
+                    .build();
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        HashMap<String, Object> payload = new HashMap<>();
+        payload.put("chat", chatMapper);
+
+        response = GenericResponse.builder()
+                .message("Chat found")
+                .responseCode(ResponseCode.API_SUCCESS)
+                .isError(false)
+                .statusCode(200)
+                .payload(payload)
+                .build();
+
+        return ResponseEntity.ok().body(response);
     }
 
 }
