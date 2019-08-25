@@ -1,6 +1,7 @@
 package com.rmehub.chat.responseDto;
 
 import com.rmehub.chat.model.ChatMapper;
+import com.rmehub.chat.model.ChatMessage;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,7 +16,7 @@ import java.util.List;
 @Builder
 public class ChatResponseDto {
 
-    List<ChatMapper> mapper = new ArrayList<>();
+    List<ChatMessage> mapper = new ArrayList<>();
     long totalElements;
     int noOfPages;
 

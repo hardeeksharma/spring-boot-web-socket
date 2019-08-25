@@ -3,6 +3,7 @@ package com.rmehub.chat.service;
 import com.rmehub.chat.constant.ResponseCode;
 import com.rmehub.chat.exception.ChatChannelException;
 import com.rmehub.chat.model.ChatMapper;
+import com.rmehub.chat.model.ChatMessage;
 import com.rmehub.chat.repository.ChatMapperRepo;
 import com.rmehub.chat.responseDto.ChatResponseDto;
 import lombok.extern.slf4j.Slf4j;
@@ -41,9 +42,9 @@ public class ChatMapperService {
         Page<ChatMapper> chatPage = chatMapperRepo.findByChannelIdOrderByCreationDateDesc(channelId, pageableRequest);
         ChatResponseDto chatResponseDto = new ChatResponseDto();
 
-        List<ChatMapper> listOfChats = new ArrayList<>();
+        List<ChatMessage> listOfChats = new ArrayList<>();
 
-        chatPage.get().forEach(o -> listOfChats.add(o));
+        chatPage.get().forEach(o -> listOfChats.add(o.getMessage()));
         chatResponseDto.setNoOfPages(chatPage.getTotalPages());
         chatResponseDto.setMapper(listOfChats);
         chatResponseDto.setTotalElements(chatPage.getTotalElements());

@@ -20,7 +20,6 @@ public class ChatChannelListResponse {
     ChatRequest chatRequest;
     ChatUser sender;
     ChatUser receiver;
-    String requestId;
     Date lastChatTime;
     Date createdAt;
     Date updatedAt;

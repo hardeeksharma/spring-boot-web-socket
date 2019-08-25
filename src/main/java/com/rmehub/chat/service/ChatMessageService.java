@@ -48,8 +48,6 @@ public class ChatMessageService {
         chatMapper.setMessage(message);
         chatMapperRepo.save(chatMapper);
 
-
-
         return message;
 
     }

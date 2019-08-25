@@ -10,7 +10,6 @@ import com.rmehub.chat.model.ChatMessage;
 import com.rmehub.chat.model.ChatRequest;
 import com.rmehub.chat.service.ChatMessageService;
 import com.rmehub.chat.service.ChatRequestService;
-import com.sun.tools.javah.Gen;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -143,10 +143,12 @@ public class RestController {
     @GetMapping("/channel/{channelId}/chat")
     ResponseEntity<?> getChannelChat(@PathVariable("channelId") String channelId ,
                                      @RequestParam Integer pageNo , @RequestParam Integer size) {
+        log.info("========getChannelChat============");
         GenericResponse response;
         ChatResponseDto chatMapper;
         try {
             chatMapper = chatMapperService.getChannelChat(channelId , pageNo , size);
+            log.info("Chat Found");
         } catch (ChatChannelException ex) {
             response = GenericResponse.builder()
                     .isError(true)
@@ -178,6 +180,7 @@ public class RestController {
                 .payload(payload)
                 .build();
 
+        log.info("======== END : getChannelChat============");
         return ResponseEntity.ok().body(response);
     }
 

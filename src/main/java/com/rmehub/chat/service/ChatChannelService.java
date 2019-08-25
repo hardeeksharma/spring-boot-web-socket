@@ -47,8 +47,6 @@ public class ChatChannelService {
 
         log.info("Chat Channels Found for " + uuid);
 
-        log.info("Chat Channel count" + optional.get().size());
-
         List<ChatChannelListResponse> list = new ArrayList<>();
 
 
@@ -69,7 +67,7 @@ public class ChatChannelService {
                     .fullName(o.getReceiver().getFullName())
                     .build();
 
-            if (o.getRequest().getRequestFromUuid().equals(receiverLocal.getUuid()))
+            if (o.getRequest().getRequestFromUuid().equals(uuid))
                 dispName = receiverLocal.getFullName();
             else
                 dispName = senderLocal.getFullName();
@@ -82,7 +80,6 @@ public class ChatChannelService {
                     .createdAt(o.getCreatedAt())
                     .updatedAt(o.getUpdatedAt())
                     .lastChatTime(o.getLastChatTimeStamp())
-                    .requestId(o.getRequest().getId())
                     .receiver(receiverLocal)
                     .sender(senderLocal)
                     .chatRequest(o.getRequest())

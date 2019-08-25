@@ -23,7 +23,7 @@ public class ChatMapper {
     @Id
     private String id;
 
-    @DBRef
+    //@DBRef
     ChatMessage message;
 
     @Indexed
